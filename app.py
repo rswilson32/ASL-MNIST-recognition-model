@@ -11,27 +11,8 @@ camera = cv2.VideoCapture(0)
 thread = None
 lock = threading.Lock()
 
-def video_feed():
-    global camera
-    while True:
-        with lock:
-            ret, frame = camera.read()
-        if not ret:
-            break
-        _, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/video_feed')
-def video_feed_route():
-    return Response(video_feed(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 def classify_and_display(frame):
+    frame = cv2.flip(frame, 1)
     # Define the region of interest (ROI)
     top, right, bottom, left = 50, 350, 300, 600
     roi = frame[top:bottom, right:left]
@@ -54,7 +35,7 @@ def classify_and_display(frame):
 
     return frame
 
-def capture_frames():
+def generate_video_feed():
     global camera
     while True:
         with lock:
@@ -64,12 +45,29 @@ def capture_frames():
 
         frame = classify_and_display(frame)
 
-        # Display the frame
-        cv2.imshow('Camera Recognition', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        _, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/video_feed')
+def video_feed_route():
+    return Response(generate_video_feed(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def capture_frames():
+    global camera
+    while True:
+        with lock:
+            ret, _ = camera.read()
+        if not ret:
             break
 
 if __name__ == '__main__':
     thread = threading.Thread(target=capture_frames)
     thread.start()
     app.run(debug=True, use_reloader=False)
+

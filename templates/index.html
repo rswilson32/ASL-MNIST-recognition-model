@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Recognition</title>
+    <style>
+        body {
+            background-color: #F86624; /* Set background color */
+            text-align: center; /* Center text */
+            font-family: 'Arial', sans-serif; /* Use a specific font */
+        }
+
+        #video_feed {
+            width: 80%; /* Adjust the video feed width */
+            border: 2px solid #333; /* Add a border around the video feed */
+            margin: 20px auto; /* Add margin for better spacing */
+            display: block; /* Center the video feed */
+        }
+
+        #instructions {
+            font-size: 18px; /* Set font size for instructions */
+            color: #333; /* Set text color */
+            margin-top: 20px; /* Add margin at the top */
+        }
+    </style>
+</head>
+<body>
+    <div id="instructions">
+        <p>Instructions: Your instructions go here. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </div>
+    <img id="video_feed" src="{{ url_for('video_feed_route') }}" />
+
+</body>
+</html>
+
